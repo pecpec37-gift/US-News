@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>朝5分USニュース</title>
+<meta name="description" content="米国政府・FRB・議会・裁判所などの一次情報をもとに、重要な時事ニュースを毎朝5分で。">
+<meta name="theme-color" content="#1b2a44">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="朝5分US">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one narrow reading column like a morning paper on a phone — masthead, "4 points" briefing, then stories, trend note and the week's calendar. */
+:root{
+  --bg:#f3f2ee; --paper:#fdfcf9; --ink:#1b2a44; --muted:#5f6675; --line:#dddad2;
+  --dawn:#a8322d; --dawn-soft:#f5e3df; --sky:#2a5a96;
+  --c-exec:#1b2a44; --c-congress:#2a5a96; --c-court:#6b4fa3; --c-econ:#2f7a56; --c-diplo:#a8322d; --c-trade:#a8641c;
+  --f-display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161f; --paper:#19202b; --ink:#e8ebf0; --muted:#9ba3b2; --line:#2a3240;
+  --dawn:#f08a7c; --dawn-soft:#3a2321; --sky:#8fb6e8;
+  --c-exec:#c9d3e6; --c-congress:#8fb6e8; --c-court:#b79ceb; --c-econ:#7fc59a; --c-diplo:#f08a7c; --c-trade:#e8a55e;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161f; --paper:#19202b; --ink:#e8ebf0; --muted:#9ba3b2; --line:#2a3240;
+  --dawn:#f08a7c; --dawn-soft:#3a2321; --sky:#8fb6e8;
+  --c-exec:#c9d3e6; --c-congress:#8fb6e8; --c-court:#b79ceb; --c-econ:#7fc59a; --c-diplo:#f08a7c; --c-trade:#e8a55e;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+a{color:var(--sky)}
+:focus-visible{outline:2px solid var(--dawn);outline-offset:2px;border-radius:4px}
+
+/* progress */
+.progress{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;height:4px;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));background:var(--line)}
+.progress span{display:block;height:100%;width:0;background:var(--dawn);transition:width .15s linear}
+
+/* masthead */
+.top{display:flex;justify-content:space-between;align-items:center;padding-top:14px;font-size:13px}
+.back{color:var(--muted);text-decoration:none}
+.mast{display:flex;flex-direction:column;gap:10px;padding-top:8px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;color:var(--dawn);text-transform:uppercase}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,8vw,42px);line-height:1.2;margin:0;text-wrap:balance}
+h1 .sun{display:inline-block;width:.5em;height:.58em;background:var(--dawn);vertical-align:-.02em;margin-left:.18em;border-radius:.12em;clip-path:none}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--muted);font-size:14px}
+.meta b{color:var(--ink);font-weight:700}
+.loadrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font:inherit;font-weight:700;font-size:15px;border:0;border-radius:999px;padding:12px 22px;background:var(--ink);color:var(--bg);cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.btn:disabled{opacity:.55;cursor:wait}
+.btn .ic{width:16px;height:16px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%}
+.btn.spin .ic{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status{font-size:13px;color:var(--muted)}
+select{font:inherit;font-size:14px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+
+/* points */
+.points{background:var(--dawn-soft);border-radius:14px;padding:18px 18px 16px}
+.points h2{font-size:14px;letter-spacing:.08em;margin:0 0 8px;color:var(--dawn)}
+.points ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px;font-weight:500;font-size:15px;line-height:1.7}
+
+/* filter */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--co)}
+
+/* stories */
+.stories{display:flex;flex-direction:column}
+.story{padding:22px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:40px 1fr;gap:0 14px}
+.story:first-child{border-top:0;padding-top:4px}
+.mark{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-family:var(--f-body);font-weight:700;font-size:16px;color:#fff;background:var(--co)}
+.cohead{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lv{font-size:11px;font-weight:700;letter-spacing:.06em;border:1.5px solid var(--lv);color:var(--lv);border-radius:4px;padding:0 6px;line-height:1.6}
+.todo{margin-top:10px;background:var(--dawn-soft);border-radius:10px;padding:10px 12px;font-size:14.5px}
+.todo b{color:var(--dawn);margin-right:6px}
+.story > div{min-width:0}
+.co{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--co)}
+.story h3{font-family:var(--f-display);font-size:20px;line-height:1.45;margin:2px 0 10px;text-wrap:balance}
+.story p{margin:0 0 12px}
+.why{border-left:3px solid var(--co);padding:4px 0 4px 12px;font-size:14.5px;color:var(--ink);background:none}
+.why b{color:var(--co);margin-right:6px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center;margin-top:12px;font-size:13px;color:var(--muted)}
+.done{font:inherit;font-size:13px;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:4px 12px;cursor:pointer}
+.story.read .done{background:var(--co);border-color:var(--co);color:#fff}
+.story.read h3,.story.read p{opacity:.6}
+
+/* trend + calendar */
+.trend{border:1px solid var(--line);background:var(--paper);border-radius:14px;padding:18px}
+.trend h2{font-family:var(--f-display);font-size:18px;margin:0 0 6px}
+.trend p{margin:0;font-size:15px}
+.cal h2{font-size:14px;letter-spacing:.08em;color:var(--muted);margin:0 0 6px}
+.cal ul{list-style:none;margin:0;padding:0}
+.cal li{display:grid;grid-template-columns:8.5em 1fr;gap:10px;padding:10px 0;border-top:1px dashed var(--line);font-size:14.5px;align-items:baseline}
+.cal time{font-family:var(--f-mono);font-size:13px;color:var(--dawn);font-variant-numeric:tabular-nums}
+.cal span{min-width:0}
+.cal span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--co);margin-right:8px}
+.empty{background:var(--paper);border:1px dashed var(--line);border-radius:14px;padding:24px;color:var(--muted);text-align:center}
+.note{font-size:12.5px;color:var(--muted);line-height:1.7}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"><span id="bar"></span></div>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="https://pecpec37-gift.github.io/portal/">← TomTom TOWNS</a>
+    <span class="status" id="clock"></span>
+  </div>
+
+  <header class="mast">
+    <div class="eyebrow">Morning Brief · U.S. Primary Sources</div>
+    <h1>朝5分で読む<br>USニュース<span class="sun" aria-hidden="true"></span></h1>
+    <div class="meta" id="meta"><span>最新号を読み込み中…</span></div>
+    <div class="loadrow">
+      <button class="btn" id="load" type="button"><span class="ic" aria-hidden="true"></span>最新ニュースを確認</button>
+      <select id="past" aria-label="過去の号を選ぶ" hidden></select>
+    </div>
+    <div class="status" id="status" role="status"></div>
+  </header>
+
+  <main id="main" class="wrap" style="gap:28px">
+    <div class="empty">最新号を読み込んでいます…</div>
+  </main>
+
+  <p class="note">米国の政府機関・FRB・議会・裁判所などの公式発表（一次情報）と報道をもとに、日本語でまとめたものです。特定の政党や立場を支持するものではありません。数字や予定は各出典で確認してください。</p>
+</div>
+
+<script>
+(function(){
+  const CO = {
+    exec:{n:"大統領・行政",l:"WH",v:"--c-exec"},
+    congress:{n:"議会",l:"議",v:"--c-congress"},
+    court:{n:"司法",l:"司",v:"--c-court"},
+    econ:{n:"経済・金融",l:"$",v:"--c-econ"},
+    diplo:{n:"外交・安全保障",l:"外",v:"--c-diplo"},
+    trade:{n:"通商・規制",l:"通",v:"--c-trade"}
+  };
+  const ORDER = ["exec","congress","court","econ","diplo","trade"];
+  const LV = {};
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const safeUrl = u => /^https?:\/\//i.test(String(u||"")) ? u : "#";
+  let list = [], current = null, filter = "all";
+  const cache = {};
+
+  const store = {
+    get(k){ try{ return JSON.parse(localStorage.getItem(k) || "null"); }catch(e){ return null; } },
+    set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  };
+
+  function tick(){
+    const d = new Date();
+    $("clock").textContent = d.toLocaleDateString("ja-JP",{month:"long",day:"numeric",weekday:"short"}) + " " +
+      d.toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"});
+  }
+  tick(); setInterval(tick, 30000);
+
+  async function getJSON(path){
+    const r = await fetch(path + "?t=" + Date.now(), {cache:"no-store"});
+    if(!r.ok) throw new Error(String(r.status));
+    return r.json();
+  }
+  async function getEdition(date){
+    if(!cache[date]) cache[date] = await getJSON("data/editions/" + date + ".json");
+    return cache[date];
+  }
+
+  function readKey(){ return "read:" + (current ? current.date : ""); }
+
+  function render(){
+    const e = current;
+    if(!e) return;
+    const all = e.items || [];
+    if(filter !== "all" && !all.some(it => it.cat === filter)) filter = "all";
+    const items = all.filter(it => filter === "all" || it.cat === filter);
+    const read = store.get(readKey()) || [];
+    $("meta").innerHTML = `<span><b>${esc(e.label)}</b></span><span>対象期間 ${esc(e.coverage)}</span><span>約${esc(e.minutes)}分</span><span>${all.length}本</span>`;
+
+    const present = ORDER.filter(k => all.some(it => it.cat === k));
+    const chips = [`<button class="chip" type="button" data-f="all" aria-pressed="${filter==="all"}">すべて</button>`]
+      .concat(present.map(k => `<button class="chip" type="button" data-f="${k}" aria-pressed="${filter===k}" style="--co:var(${CO[k].v})"><span class="dot"></span>${CO[k].n}</button>`)).join("");
+
+    const stories = items.map(it => {
+      const c = CO[it.cat] || {n:it.cat,l:"?",v:"--muted"};
+      const idx = all.indexOf(it);
+      const isRead = read.includes(idx);
+      return `<article class="story${isRead?" read":""}" style="--co:var(${c.v})">
+        <div class="mark" aria-hidden="true">${c.l}</div>
+        <div>
+          <div class="cohead"><span class="co">${esc(c.n)}</span>${LV[it.stage] ? `<span class="lv" style="--lv:var(${LV[it.stage][1]})">${LV[it.stage][0]}</span>` : ""}</div>
+          <h3>${esc(it.headline)}</h3>
+          <p>${esc(it.body)}</p>
+          <div class="why"><b>ポイント</b>${esc(it.why)}</div>
+          ${it.jp ? `<div class="todo"><b>日本への影響</b>${esc(it.jp)}</div>` : ""}
+          <div class="foot"><span>出典：<a href="${esc(safeUrl(it.url))}" target="_blank" rel="noopener">${esc(it.src)}</a>${it.primary && it.primary !== it.url ? ` ・ <a href="${esc(safeUrl(it.primary))}" target="_blank" rel="noopener">一次情報</a>` : ""}</span>
+          <button class="done" type="button" data-i="${idx}">${isRead?"読んだ ✓":"読んだ"}</button></div>
+        </div></article>`;
+    }).join("");
+
+    const cal = (e.calendar||[]).map(x => `<li style="--co:var(${(CO[x.cat]||{v:"--muted"}).v})"><time>${esc(x.when)}</time><span>${esc(x.what)}</span></li>`).join("");
+
+    $("main").innerHTML = `
+      <section class="points" aria-label="今日のポイント">
+        <h2>まずはこれだけ</h2>
+        <ol>${(e.points||[]).map(p => `<li>${esc(p)}</li>`).join("")}</ol>
+      </section>
+      <nav class="chips" aria-label="ジャンルで絞り込む">${chips}</nav>
+      <section class="stories">${stories}</section>
+      ${e.trend ? `<section class="trend"><h2>${esc(e.trend.title)}</h2><p>${esc(e.trend.body)}</p></section>` : ""}
+      ${cal ? `<section class="cal"><h2>今後の予定（日本時間）</h2><ul>${cal}</ul></section>` : ""}`;
+    onScroll();
+  }
+
+  $("main").addEventListener("click", ev => {
+    const chip = ev.target.closest(".chip");
+    if(chip){ filter = chip.dataset.f; store.set("filter", filter); render(); return; }
+    const done = ev.target.closest(".done");
+    if(done){
+      const i = Number(done.dataset.i), k = readKey();
+      const r = new Set(store.get(k) || []);
+      r.has(i) ? r.delete(i) : r.add(i);
+      store.set(k, [...r]); render();
+    }
+  });
+
+  function fillPast(){
+    const sel = $("past");
+    if(list.length < 2){ sel.hidden = true; return; }
+    sel.innerHTML = list.map(x => `<option value="${esc(x.date)}"${current && x.date===current.date?" selected":""}>${esc(x.label)}</option>`).join("");
+    sel.hidden = false;
+  }
+  $("past").addEventListener("change", async ev => {
+    try{ current = await getEdition(ev.target.value); render(); window.scrollTo({top:0}); }
+    catch(e){ $("status").textContent = "この号を読み込めませんでした。"; }
+  });
+
+  async function load(){
+    const btn = $("load");
+    btn.disabled = true; btn.classList.add("spin");
+    $("status").textContent = "最新号を確認しています…";
+    const before = current && current.date;
+    try{
+      const idx = await getJSON("data/index.json");
+      list = (idx.editions || []).slice().sort((a,b) => a.date < b.date ? 1 : -1);
+      if(!list.length){
+        $("meta").innerHTML = "<span>まだ号がありません</span>";
+        $("main").innerHTML = '<div class="empty">まだ号が届いていません。毎朝6時ごろに新しい号が追加されます。</div>';
+        $("status").textContent = "";
+        return;
+      }
+      delete cache[list[0].date];
+      current = await getEdition(list[0].date);
+      const t = new Date().toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"});
+      $("status").textContent = (before && before === current.date ? "新しい号はまだありません（" : "最新号を表示しています（") + t + " 確認）";
+      render(); fillPast();
+    }catch(err){
+      $("status").textContent = "読み込めませんでした。通信状態を確認して、もう一度押してください。";
+      if(!current) $("meta").innerHTML = "<span>オフライン</span>";
+    }finally{
+      btn.disabled = false; btn.classList.remove("spin");
+    }
+  }
+  $("load").addEventListener("click", load);
+
+  function onScroll(){
+    const h = document.documentElement.scrollHeight - innerHeight;
+    $("bar").style.width = (h > 0 ? Math.min(100, scrollY / h * 100) : 0) + "%";
+  }
+  addEventListener("scroll", onScroll, {passive:true});
+  document.addEventListener("visibilitychange", () => {
+    if(document.visibilityState === "visible" && current && current.date < new Date(Date.now()+9*3600e3).toISOString().slice(0,10)) load();
+  });
+
+  const f = store.get("filter"); if(f) filter = f;
+  load();
+})();
+</script>
+</body>
+</html>
